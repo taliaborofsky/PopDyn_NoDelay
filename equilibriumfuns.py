@@ -5,7 +5,7 @@ import scipy.stats as scs
 import helperfuns
 from helperfuns import *
 from numpy.lib.scimath import sqrt as csqrt
-
+import cmath
 
 
 def get_r_hat(K,pc,delta,R):
@@ -21,7 +21,7 @@ def get_r_hat(K,pc,delta,R):
         rpos = (-b + np.sqrt(b**2 - 4*a*c))/(2*a) 
         rneg = (-b - np.sqrt(b**2 - 4*a*c))/(2*a)
         if R < delta:
-            rpos_ans = rpos if rpos > 0 and rpos >= delta else np.nan
+            rpos_ans = rpos if rpos < 1 and rpos >= delta else np.nan
             rneg_ans=np.nan
         if R > delta:
             rpos_ans = rpos if rpos > 0 and rpos <= delta else np.nan
@@ -90,7 +90,7 @@ def get_N_hat(r,delta,R,beta):
 # this should be 1 + delta if r > 0
 #def get_W_hat(r,delta,R)
 
-def get_Jstar_lambdas(r,u,N,K,pc,delta,R):
+def get_Jstar_lambdas(r,u,N,K,pc,beta, delta,R):
     # J = ((1,a,b), (0,c,d), (e,f,g))
     # rows and columns: dn, du, dr
     #(1,a,b) from Eq. 37 (the equation for delta_N')
@@ -108,7 +108,7 @@ def get_Jstar_lambdas(r,u,N,K,pc,delta,R):
     xi1 = -c -g -1
     xi2 = b*e - c*g - c + d*f - g
     xi3 = -a*d*e + b*c*e - c*g + d*f
-    xi4 = np.sqrt(-4*(3*xi2 + xi1**2)**3 + (27*xi3 + 9*xi1*xi2 + 2*xi1**3)**2)
+    xi4 = cmath.sqrt(-4*(3*xi2 + xi1**2)**3 + (27*xi3 + 9*xi1*xi2 + 2*xi1**3)**2)
     xi5 = np.cbrt((27/2)*xi3 + (1/2)*xi4 + (9/2)*xi1*xi2 + xi1**3)
     lambda1 = (-1/3)*(xi1 + (3*xi2 + xi1**2)/xi5 + xi5)
 
@@ -127,7 +127,7 @@ def get_internal_stability(r,beta,K,pc,delta,R):
     N = get_N_hat(r,delta,R,beta)
     #TO-DO: What if delta = R???
     u = get_u_hat(r,delta,R)
-    lambdas = get_Jstar_lambdas(r,u,N,K,pc,delta,R)
+    lambdas = get_Jstar_lambdas(r,u,N,K,pc,beta, delta,R)
     mags = np.abs(lambdas)
     if np.max(mags)>1:
         return(0)
@@ -135,4 +135,5 @@ def get_internal_stability(r,beta,K,pc,delta,R):
         return(1)
     else:
         return(-1)
+
 
