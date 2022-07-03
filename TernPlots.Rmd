@@ -1,0 +1,52 @@
+---
+title: "TernPlots"
+author: "Talia Borofsky"
+date: "2/17/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggtern)
+library(latex2exp)
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+
+n = 500
+K <- rep(c(0:n)/n,n)
+pc <- rep(c(0:n)/n,times=1,each=n)
+df <- data.frame(K=K,pc=pc)
+df <- df[df$K + df$pc < 1,]
+df$pw <- 1 - df$K - df$pc
+result3.3 <- function(K,pc,R,delta){ return(sign(pc*(1-R) + (delta-R)*(1+R)*(2*K/(1+delta) -1)))}
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r result3.3, echo=FALSE}
+R = 0.2; delta = 0.5
+result3.3.sign <- result3.3(df$K,df$pc,R,delta)
+df$result3.3 <- factor(result3.3.sign)
+head(df)
+
+p <- ggtern(data=df, mapping=aes(x=K,y=pc,z=pw)) + geom_point(aes(colour=result3.3),shape=21) +xlab(TeX("$K$")) + ylab(TeX("$\\pi_c$")) + zlab(TeX("$\\pi_W$")) #geom_polygon(mapping=aes(fill=result3.3), alpha=0.75,size=0.5) + xlab(LaT)
+p+scale_T_continuous(breaks = c(0.25,0.5,0.75), labels = c(0.25,0.5,0.75))+scale_L_continuous(breaks = c(0.25,0.5,0.75), labels = c(0.25,0.5,0.75))+scale_R_continuous(breaks = c(0.25,0.5,0.75), labels = c(0.25,0.5,0.75))
+
+```
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
