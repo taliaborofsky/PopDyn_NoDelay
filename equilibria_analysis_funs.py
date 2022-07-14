@@ -71,4 +71,10 @@ def get_r_hat_1(K,pc,delta,R):
     else:
         return(np.nan)
     
-get_r_hat_vec1 = np.frompyfunc(get_r_hat_1,4,1)       
+get_r_hat_vec1 = np.frompyfunc(get_r_hat_1,4,1)  
+
+def get_Nβ_r(r, δ, R):
+        Nβ = (1-r)*(r-R)/(δ-R)
+        return Nβ
+def u_r_hat(r,R,δ):
+    return (δ-R)*(1+r)/((r-R)*(1+δ))
