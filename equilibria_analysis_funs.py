@@ -2,7 +2,10 @@ import numpy as np
 import scipy.stats as scs
 from helperfuns import *
 
-def custmax_s_2(mu, R, δ, smax = 3):
+
+def custmax_s_2(params):
+    smax = 3
+    mu, R, δ = params
     def get_Nβ(s):
         K = Kfun(s,scs.norm(mu))
         pc = pcfun(s,scs.norm(mu))
@@ -12,8 +15,8 @@ def custmax_s_2(mu, R, δ, smax = 3):
     # gives 2 results...from searching up and from searching down
     
     
-    def get_best(smin,smax = 3,nsteps = 1000, reverse = False, go_smaller = True):
-        list_iterate = np.linspace(smax, smin) if reverse \
+    def get_best(smin,smax = 3,nsteps = 5000, reverse = False, go_smaller = True):
+        list_iterate = np.linspace(smax, smin, nsteps) if reverse \
             else np.linspace(smin, smax, nsteps) 
 
         besty = 0
@@ -25,14 +28,7 @@ def custmax_s_2(mu, R, δ, smax = 3):
                 besty = testy
                 bestx = s
             else:
-                # stopping condition
-                if go_smaller:
-                    bestx, besty = get_best(smin = bestx, 
-                                            smax = s, 
-                                            go_smaller = False,
-                                           nsteps = 100)
-                else:
-                    break
+                break
         return(bestx, besty)
     
     
@@ -53,7 +49,6 @@ def custmax_s_2(mu, R, δ, smax = 3):
     return maxs_0, maxs_1, maxNβ_0, maxNβ_1
             
                 
-
                 
 
 def get_r_hat_1(K,pc,delta,R):
