@@ -43,16 +43,22 @@ def PopSize(N_t,W,delta):
     # W is mean population fitness
     # delta is the death rate
     N_tplus1 = N_t*(W-delta)
-    return(N_tplus1)
+    # to avoid runtime issues
+    if N_tplus1 > 1E9:
+        return(1E9)
+    elif N_tplus1 <1E-9:
+        return(0)
+    else:
+        return(N_tplus1)
 
 
 
 def NextGen(u_r,u_R,x_r,x_R,N, r,R,beta,delta,K,pc,dk,dpc):
-    print(uvec)
-    u_r,u_R = uvec
+#    u_r,u_R = uvec
     u = u_r + u_R; x = 1 - u;
-    x_r,x_R = xvec
+#    x_r,x_R = xvec
     p_r = u_r + x_r
+    eta = 1
     
     learn_r_u = K*p_r + pc*(r/(r+R)) # no longer relevant - if r + R > 0 else K*p_r
     learn_r_x = (K+dk)*p_r + (pc+dpc)*(r/(r+R)) # no longer relevant - if r + R > 0 else (K+dk)*p_r
@@ -74,7 +80,7 @@ def NextGen(u_r,u_R,x_r,x_R,N, r,R,beta,delta,K,pc,dk,dpc):
     r_new = r_next if r_next > 0 else 0
     
     N_new = PopSize(N,W,delta)
-    return(uvec_new, xvec_new,W,N_new, r_new)
+    return(u_r,u_R, x_r,x_R,W,N_new, r_new) 
 
 def calculate_eq_r(K,pc,delta,R):
     # Calculates the nonzero r equilibrium
@@ -107,13 +113,30 @@ def iterate_row(row,tsteps):
     R = row.R.values
     beta = row.beta.values; delta = row.delta.values
     K = row.K.values; pc = row.pc.values
-    NextGenV = np.frompyfunc(NextGen,13,5)
+    NextGenV = np.frompyfunc(NextGen,13,7)
     for t in range(1,tsteps):
-        uvec_new, xvec_new,W,N_new, r_new = NextGenV(u_r,u_R,x_r,x_R,N,r,R,beta,delta,K,pc,0,0)
-        uvec, xvec, N, r = uvec_new, xvec_new, N_new,r_new
-    row.u_r_eq = uvec[0]
+        out = NextGenV(u_r,u_R,x_r,x_R,N,r,R,beta,delta,K,pc,0,0)
+        u_r, u_R, x_r,x_R,W,N, r = np.array(list(out),dtype=float)
+    row.u_r_eq = u_r
     row.r_eq = r
     row.N_eq = N
     row.W_eq = W
     return(row)
+
+def get_trajectory(u_r,u_R,x_r,x_R,N,r,R,beta,delta,K,pc,tsteps, dk = 0, dpc = 0):
+    # TO-DO: Check this works!!!
+    u_r_vec = np.zeros(tsteps); u_r_vec[0] = u_r
+    u_R_vec = np.zeros(tsteps); u_R_vec[0] = u_R
+    x_r_vec = np.zeros(tsteps); x_r_vec[0] = x_r
+    x_R_vec = np.zeros(tsteps); x_R_vec[0] = x_R
+    N_vec = np.zeros(tsteps); N_vec[0] = N;
+    r_vec = np.zeros(tsteps); r_vec[0] = r;
+    NextGenV = np.frompyfunc(NextGen,13,7)
+    for t in range(1,tsteps):
+        out = NextGenV(u_r,u_R,x_r,x_R,N,r,R,beta,delta,K,pc,dk,dpc)
+        u_r, u_R, x_r, x_R, W, N, r = np.array(list(out), dtype=float)
+        u_r_vec[t], u_R_vec[t], x_r_vec[t], x_R_vec[t], N_vec[t], r_vec[t] = u_r, u_R, x_r, x_R, N, r
+    return(u_r_vec, u_R_vec, x_r_vec, x_R_vec, N_vec, r_vec, W)
+    
+    
     

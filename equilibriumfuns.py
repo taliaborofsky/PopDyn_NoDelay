@@ -90,50 +90,6 @@ def get_N_hat(r,delta,R,beta):
 # this should be 1 + delta if r > 0
 #def get_W_hat(r,delta,R)
 
-def get_Jstar_lambdas(r,u,N,K,pc,beta, delta,R):
-    # J = ((1,a,b), (0,c,d), (e,f,g))
-    # rows and columns: dn, du, dr
-    #(1,a,b) from Eq. 37 (the equation for delta_N')
-    # (0,c,d) from Eq. 38 (the equation for delta_u_r')
-    # (e,f,g) from Eq. 39 (the equation for delta_r')
-    L = K*u + pc*r/(r+R)
-    a = N*K
-    b = N*(L + R*pc*(r-R)/((r+R)**2))
-    c = (K/(1+delta))*(1+r-u*(r-R))
-    d = (L/(1+delta))*(1-u) + (pc*R/((1+delta)*(r+R)**2))*(1+r-u*(r-R))
-    e = -r*beta*L/(1+r)
-    f = -K*N*r*beta/(1+r)
-    g = 1/(1+r) - N*r*beta*R*pc/((1+r)*(r+R)**2)
-    
-    xi1 = -c -g -1
-    xi2 = b*e - c*g - c + d*f - g
-    xi3 = -a*d*e + b*c*e - c*g + d*f
-    xi4 = cmath.sqrt(-4*(3*xi2 + xi1**2)**3 + (27*xi3 + 9*xi1*xi2 + 2*xi1**3)**2)
-    xi5 = np.cbrt((27/2)*xi3 + (1/2)*xi4 + (9/2)*xi1*xi2 + xi1**3)
-    lambda1 = (-1/3)*(xi1 + (3*xi2 + xi1**2)/xi5 + xi5)
 
-    vcomplex = np.vectorize(complex)
-    lambda2 = vcomplex((1/3)*(xi1 + (3*xi2+xi1**2)/(2*xi5) + xi5/2),
-                                   (np.sqrt(3)/6)*((3*xi2+xi1**2)/xi5 - xi5))
-    lambda3 = vcomplex((1/3)*(xi1 + (3*xi2+xi1**2)/(2*xi5) + xi5/2),
-                                   -(np.sqrt(3)/6)*((3*xi2+xi1**2)/xi5 - xi5))
-    
-    return([lambda1, lambda2, lambda3])
-
-# gets the internal stability given parameters and r
-def get_internal_stability(r,beta,K,pc,delta,R):
-    if r == np.nan:
-        return(np.nan)
-    N = get_N_hat(r,delta,R,beta)
-    #TO-DO: What if delta = R???
-    u = get_u_hat(r,delta,R)
-    lambdas = get_Jstar_lambdas(r,u,N,K,pc,beta, delta,R)
-    mags = np.abs(lambdas)
-    if np.max(mags)>1:
-        return(0)
-    elif np.max(mags) < 1:
-        return(1)
-    else:
-        return(-1)
 
 
