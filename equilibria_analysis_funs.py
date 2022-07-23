@@ -374,7 +374,7 @@ def find_s_tilde_v(list_params):
     shape = shapes[argmax]
     svec = np.zeros(shape)-1
     norm = scs.norm(mu)
-    for s in np.linspace(0,4,10000):
+    for s in np.linspace(0,4,int(1e06)):
         K = Kfun(s, norm)
         pc = pcfun(s,norm)
         L_definition = K*u + pc*r/(r+R)
