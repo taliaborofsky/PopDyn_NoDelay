@@ -374,12 +374,23 @@ def find_s_tilde_v(list_params):
     shape = shapes[argmax]
     svec = np.zeros(shape)-1
     norm = scs.norm(mu)
+    diff = np.ones(shape) # so set at first to 1... difference between L_definition and L can't be more than one
     for s in np.linspace(0,4,int(1e06)):
         K = Kfun(s, norm)
         pc = pcfun(s,norm)
         L_definition = K*u + pc*r/(r+R)
-        mask = np.isclose(L_definition, L, rtol = 1e-5, atol = 1e-5)
+        
+        # get difference
+        diff_curr = np.abs(L_definition - L)
+        
+        # if difference less, replace
+        mask = diff_curr < diff
         svec[mask] = s
+        
+        # the diff_curr becomes the old diff
+        diff = diff_curr
+        
+
     
     return(svec)
             
